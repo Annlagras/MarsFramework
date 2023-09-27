@@ -1,86 +1,70 @@
-﻿using MarsFramework.Global;
+﻿using Competition.Global;
 using OpenQA.Selenium;
-using SeleniumExtras.PageObjects;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static Competition.Global.GlobalDefinitions;
 
-namespace MarsFramework.Pages
+namespace Competition.Pages
 {
-    public class SignUp
+    internal class SignUp
     {
-        public SignUp()
-        {
-            PageFactory.InitElements(Global.GlobalDefinitions.driver, this);
-        }
-
         #region  Initialize Web Elements 
-
-        //Finding the Join
-        [FindsBy(How = How.XPath, Using = "//*[@id='home']/div/div/div[1]/div/button")]
-        private IWebElement Join { get; set; }
-
+        //Finding the Join 
+        private IWebElement Join => driver.FindElement(By.XPath("//button[@class='ui green basic button']"));
 
         //Identify FirstName Textbox
-        [FindsBy(How = How.XPath, Using = "/html/body/div[2]/div/div/form/div[1]/input")]
-        private IWebElement FirstName { get; set; }
+        private IWebElement FirstName => driver.FindElement(By.Name("firstName"));
 
         //Identify LastName Textbox
-        [FindsBy(How = How.XPath, Using = "/html/body/div[2]/div/div/form/div[2]/input")]
-        private IWebElement LastName { get; set; }
+        private IWebElement LastName => driver.FindElement(By.Name("lastName"));
 
         //Identify Email Textbox
-        [FindsBy(How = How.XPath, Using = "/html/body/div[2]/div/div/form/div[3]/input")]
-        private IWebElement Email { get; set; }
+        private IWebElement Email => driver.FindElement(By.Name("email"));
 
         //Identify Password Textbox
-        [FindsBy(How = How.XPath, Using = "/html/body/div[2]/div/div/div/form/div[4]/input")]
-        private IWebElement Password { get; set; }
+        private IWebElement Password => driver.FindElement(By.XPath("//input[@name='password']"));
 
         //Identify Confirm Password Textbox
-        [FindsBy(How = How.XPath, Using = "/html/body/div[2]/div/div/div/form/div[5]/input")]
-        private IWebElement ConfirmPassword { get; set; }
+        private IWebElement ConfirmPassword => driver.FindElement(By.XPath("//input[@name='confirmPassword']"));
 
         //Identify Term and Conditions Checkbox
-        [FindsBy(How = How.XPath, Using = "/html/body/div[2]/div/div/div/form/div[6]/div/div/input")]
-        private IWebElement Checkbox { get; set; }
-
+        private IWebElement Checkbox => driver.FindElement(By.XPath("//input[@type='checkbox']"));
 
         //Identify join button
-        [FindsBy(How = How.XPath, Using = "//*[@id='submit-btn']")]
-        private IWebElement JoinBtn { get; set; }
+        private IWebElement JoinBtn => driver.FindElement(By.Id("submit-btn"));
         #endregion
 
-
-
-        public void register()
+        internal void Register()
         {
             //Populate the excel data
-
-            GlobalDefinitions.ExcelLib.PopulateInCollection(Base.ExcelPath, "SignUp");
+            ExcelLib.PopulateInCollection(Base.ExcelPath, "SignUp");
 
             //Click on Join button
             Join.Click();
 
             //Enter FirstName
-            FirstName.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "FirstName"));
+            FirstName.SendKeys(ExcelLib.ReadData(2, "FirstName"));
 
             //Enter LastName
-            LastName.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "LastName"));
+            LastName.SendKeys(ExcelLib.ReadData(2, "LastName"));
 
             //Enter Email
-            Email.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Email"));
+            Email.SendKeys(ExcelLib.ReadData(2, "Email"));
 
             //Enter Password
-            Password.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Password"));
+            Password.SendKeys(ExcelLib.ReadData(2, "Password"));
 
             //Enter Password again to confirm
-            ConfirmPassword.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "ConfirmPswd"));
+            ConfirmPassword.SendKeys(ExcelLib.ReadData(2, "ConfirmPswd"));
 
             //Click on Checkbox
             Checkbox.Click();
 
             //Click on join button to Sign Up
             JoinBtn.Click();
-
-
         }
     }
 }

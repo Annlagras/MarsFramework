@@ -1,477 +1,150 @@
-﻿using AutoIt;
-using MarsFramework.Config;
-using MarsFramework.Global;
-using NUnit.Framework;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.PageObjects;
+﻿using OpenQA.Selenium;
 using System;
-using System.IO;
-using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static Competition.Global.GlobalDefinitions;
 
-namespace MarsFramework.Pages
+namespace Competition.Pages
 {
     public class ShareSkill
     {
-        public ShareSkill()
-        {
-            PageFactory.InitElements(Global.GlobalDefinitions.driver, this);
-        }
+        #region Page Objects for EnterShareSkill
+        //Title textbox
+        private IWebElement Title => driver.FindElement(By.Name("title"));
 
-        #region Initialize web elements
-        //Click on ShareSkill Button
-        [FindsBy(How = How.LinkText, Using = "Share Skill")]
-        private IWebElement ShareSkillButton { get; set; }
+        //Description textbox
+        private IWebElement Description => driver.FindElement(By.Name("description"));
 
-        //Enter the Title in textbox
-        [FindsBy(How = How.Name, Using = "title")]
-        private IWebElement Title { get; set; }
+        //Category Dropdown
+        private IWebElement CategoryDropDown => driver.FindElement(By.Name("categoryId"));
 
-        //Enter the Description in textbox
-        [FindsBy(How = How.Name, Using = "description")]
-        private IWebElement Description { get; set; }
+        //SubCategory Dropdown
+        private IWebElement SubCategoryDropDown => driver.FindElement(By.Name("subcategoryId"));
 
-        //Click on Category Dropdown
-        [FindsBy(How = How.Name, Using = "categoryId")]
-        private IWebElement CategoryDropDown { get; set; }
+        //Tag names textbox
+        private IWebElement Tags => driver.FindElement(By.XPath("//form[@class='ui form']/div[4]/div[2]/div/div/div/div/input"));
 
-        //Click on SubCategory Dropdown
-        [FindsBy(How = How.Name, Using = "subcategoryId")]
-        private IWebElement SubCategoryDropDown { get; set; }
+        //Entered displayed Tags
+        private IList<IWebElement> displayedTags => driver.FindElements(By.XPath("//form[@class='ui form']/div[4]/div[2]/div/div/div/span/a"));
+        //form[@class='ui form']/div[4]/div[2]/div/div/div/span/a
 
-        //Enter Tag names in textbox
-        [FindsBy(How = How.XPath, Using = "//input[@value='']")]
-        private IWebElement Tags { get; set; }
+        //Service type radio button
+        private IList<IWebElement> radioServiceType => driver.FindElements(By.Name("serviceType"));
 
-        //Select the Service type
-        [FindsBy(How = How.XPath, Using = "//form/div[5]/div[@class='twelve wide column']/div/div[@class='field']")]
-        private IWebElement ServiceTypeOptions { get; set; }
+        //Location Type radio button
+        private IList<IWebElement> radioLocationType => driver.FindElements(By.Name("locationType"));
 
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[5]/div[2]/div[1]/div[1]/div/input")]
-        private IWebElement ServicetypeHourly { get; set; }
+        //Start Date dropdown
+        private IWebElement StartDateDropDown => driver.FindElement(By.Name("startDate"));
 
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[5]/div[2]/div[1]/div[2]/div/input")]
-        private IWebElement ServicetypeOneOff { get; set; }
-       
-        //Select the Location Type
-        [FindsBy(How = How.XPath, Using = "//form/div[6]/div[@class='twelve wide column']/div/div[@class = 'field']")]
-        private IWebElement LocationTypeOption { get; set; }
+        //End Date dropdown
+        private IWebElement EndDateDropDown => driver.FindElement(By.Name("endDate"));
 
-        //Select Onsite
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[6]/div[2]/div/div[1]/div/input")]
-        private IWebElement LocationSelOnsite { get; set; }
+        //Available days
+        private IList<IWebElement> Days => driver.FindElements(By.XPath("//input[@name='Available']"));
 
-        //Select Online
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[6]/div[2]/div/div[2]/div/input")]
-        private IWebElement LocationSelOnline { get; set; }
+        //Starttime
+        private IList<IWebElement> StartTime => driver.FindElements(By.Name("StartTime"));
+
+        //EndTime
+        private IList<IWebElement> EndTime => driver.FindElements(By.Name("EndTime"));
 
 
+        //StartTime dropdown
+        private IWebElement StartTimeDropDown => driver.FindElement(By.XPath("//div[3]/div[2]/input[1]"));
 
-        //Click on Start Date dropdown
-        [FindsBy(How = How.Name, Using = "startDate")]
-        private IWebElement StartDateDropDown { get; set; }
+        //EndTime dropdown
+        private IWebElement EndTimeDropDown => driver.FindElement(By.XPath("//div[3]/div[3]/input[1]"));
 
-        //Click on End Date dropdown
-        [FindsBy(How = How.Name, Using = "endDate")]
-        private IWebElement EndDateDropDown { get; set; }
+        //Skill Trade option
+        private IList<IWebElement> radioSkillTrade => driver.FindElements(By.Name("skillTrades"));
 
-        //Storing the table of available days
-        [FindsBy(How = How.XPath, Using = "//body/div/div/div[@id='service-listing-section']/div[@class='ui container']/div[@class='listing']/form[@class='ui form']/div[7]/div[2]/div[1]")]
-        private IWebElement Days { get; set; }
-        
-        //Select days Mon
-        [FindsBy(How = How.XPath, Using = "(//input[@name='Available'])[2]")]
-        private IWebElement Mon { get; set; }
-
-        //Select days Tuesday
-        [FindsBy(How = How.XPath, Using = "(//input[@name='Available'])[3]")]
-        private IWebElement Tue { get; set; }
-
-        //Select days Wednesday
-        [FindsBy(How = How.XPath, Using = "(//input[@name='Available'])[4]")]
-        private IWebElement Wed { get; set; }
-
-        //Select days Thursday
-        [FindsBy(How = How.XPath, Using = "(//input[@name='Available'])[5]")]
-        private IWebElement Thurs { get; set; }
+        //Skill Exchange
+        private IWebElement SkillExchange => driver.FindElement(By.XPath("//div[@class='form-wrapper']//input[@type='text']"));
+        private IList<IWebElement> skillExchangeTags => driver.FindElements(By.XPath("//form[@class='ui form']/div[8]/div[4]/div/div/div/div/span/a"));
 
 
+        //Credit textbox
+        private IWebElement CreditAmount => driver.FindElement(By.XPath("//input[@placeholder='Amount']"));
 
-        //Storing the starttime from drop down
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[3]/div[2]/input")]
-        private IWebElement StartTimeM { get; set; }
+        //Work Samples button
+        private IWebElement btnWorkSamples => driver.FindElement(By.XPath("//i[@class='huge plus circle icon padding-25']"));
 
-        [FindsBy(How = How.XPath, Using = "(//input[@name='StartTime'])[2]")]
-        private IWebElement StartTimeDropDownM { get; set; }
+        //Active option
+        private IList<IWebElement> radioActive => driver.FindElements(By.XPath("//input[@name='isActive']"));
 
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[4]/div[2]/input")]
-        private IWebElement StartTimeT { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "(//input[@name='StartTime'])[3]")]
-        private IWebElement StartTimeDropDownT { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[5]/div[2]/input")]
-        private IWebElement StartTimeW { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "(//input[@name='StartTime'])[4]")]
-        private IWebElement StartTimeDropDownW { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[6]/div[2]/input")]
-        private IWebElement StartTimeTh { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "(//input[@name='StartTime'])[5]")]
-        private IWebElement StartTimeDropDownTh { get; set; }
-
-
-
-
-        //Storing the Endtime from drop down
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[3]/div[3]/input")]
-        private IWebElement EndTimeM { get; set; }
-       
-        [FindsBy(How = How.XPath, Using = "(//input[@name='EndTime'])[2]")]
-        private IWebElement EndTimeDropDownM { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[4]/div[3]/input")]
-        private IWebElement EndTimeT { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "(//input[@name='EndTime'])[3]")]
-        private IWebElement EndTimeDropDownT { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[5]/div[3]/input")]
-        private IWebElement EndTimeW { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "(//input[@name='EndTime'])[4]")]
-        private IWebElement EndTimeDropDownW { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[6]/div[3]/input")]
-        private IWebElement EndTimeTh { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "(//input[@name='EndTime'])[5]")]
-        private IWebElement EndTimeDropDownTh { get; set; }
-
-
-
-        //Click on Skill Trade option
-        [FindsBy(How = How.XPath, Using = "//form/div[8]/div[@class='twelve wide column']/div/div[@class = 'field']")]
-        private IWebElement SkillTradeOption { get; set; }
-
-        //Enter Skill Exchange
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[8]/div[4]/div/div/div/div/div/input")]
-        private IWebElement SkillExchange { get; set; }
-
-        //Select credit option
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[8]/div[2]/div/div[2]/div/input")]
-        private IWebElement CreditBtn { get; set; }
-
-        //Add credit amount
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[8]/div[4]/div/div/input")]
-        private IWebElement CreditAmount { get; set; }
-
-        // Add Work Samples
-        [FindsBy(How = How.XPath, Using = "//i[@class='huge plus circle icon padding-25']")]
-        private IWebElement FileUpload { get; set; }
-
-        //Click on Active/Hidden option
-        [FindsBy(How = How.XPath, Using = "//form/div[10]/div[@class='twelve wide column']/div/div[@class = 'field']")]
-        private IWebElement ActiveOption { get; set; }
-
-        [FindsBy(How = How.XPath, Using = "//*[@id='service-listing-section']/div[2]/div/form/div[10]/div[2]/div/div[2]/div/input")]
-        private IWebElement HiddenOpt { get; set; }
-
-        //Click on Save button
-        [FindsBy(How = How.XPath, Using = "//input[@value='Save']")]
-        private IWebElement Save { get; set; }
-
-        //Click on Cancel button
-        [FindsBy(How = How.XPath, Using = "//input[@value='Cancel']")]
-        private IWebElement Cancel { get; set; }
-
-        //Validate share skill details
-        //Click on manage listing
-        [FindsBy(How = How.XPath, Using = "//*[@id=\"listing-management-section\"]/div[2]/div[1]/div[2]/button[2]")]
-        private IWebElement ManageLis { get; set; }
-
+        //Save button
+        private IWebElement Save => driver.FindElement(By.XPath("//input[@value='Save']"));
         #endregion
 
-        #region Enter share skill
-        //Add share skill details
-      public void EnterShareSkill()
-        {
-            //Populate the excel data
+        #region Page Objects for VerifyShareSkill
+        //Title
+        private IWebElement actualTitle => driver.FindElement(By.XPath("//span[@class='skill-title']"));
 
-            GlobalDefinitions.ExcelLib.PopulateInCollection(Base.ExcelPath, "ShareSkill");
-            
-            try
-            {
-                #region Navigate to Share Skills Page
-                //Click on Share skill button
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "LinkText", "Share Skill", 10000);
-                ShareSkillButton.Click();
-                #endregion
+        //Description
+        private IWebElement actualDescription => driver.FindElement(By.XPath("//div[text()='Description']//following-sibling::div"));
 
-                #region Enter Title 
-                //Enter the Title in textbox
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "Name", "title", 10000);
-                Title.Click();
-                Title.Clear();
-                Title.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Title"));
-                #endregion
+        //Category
+        private IWebElement actualCategory => driver.FindElement(By.XPath("//div[text()='Category']//following-sibling::div"));
 
-                #region Enter Description
-                //Enter the Description in textbox
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "Name", "description", 10000);
-                Description.Click();
-                Description.Clear();
-                Description.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Description"));
-                #endregion
+        //Subcategory
+        private IWebElement actualSubcategory => driver.FindElement(By.XPath("//div[text()='Subcategory']//following-sibling::div"));
 
-                #region Category Drop Down
-                //Select catagory from drop down
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "Name", "categoryId", 10000);
-                CategoryDropDown.Click();
-                new SelectElement(CategoryDropDown).SelectByText(GlobalDefinitions.ExcelLib.ReadData(2, "Category"));
+        //Service Type
+        private IWebElement actualServiceType => driver.FindElement(By.XPath("//div[text()='Service Type']//following-sibling::div"));
 
-                //Select catagory from drop down
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "Name", "subcategoryId", 10000);
-                SubCategoryDropDown.Click();
-                new SelectElement(SubCategoryDropDown).SelectByText(GlobalDefinitions.ExcelLib.ReadData(2, "SubCategory"));
-                #endregion
+        //Start Date
+        private IWebElement actualStartDate => driver.FindElement(By.XPath("//div[text()='Start Date']//following-sibling::div"));
 
-                #region Tags
-                //Enter Tag names in textbox
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//input[@value='']", 10000);
-                Tags.Click();
-                Tags.Clear();
-                Tags.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Tags"));
-                Tags.SendKeys(Keys.Enter);
-                #endregion
+        //End Date
+        private IWebElement actualEndDate => driver.FindElement(By.XPath("//div[text()='End Date']//following-sibling::div"));
 
-                #region Service Type Selection
-                //Select service type
-                if (GlobalDefinitions.ExcelLib.ReadData(2, "ServiceType") == "Hourly basis service")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[5]/div[@class='twelve wide column']/div/div[@class='field']", 10000);
-                    ServiceTypeOptions.Click();
-                    ServicetypeHourly.Click();
-                }
-                else if (GlobalDefinitions.ExcelLib.ReadData(2, "ServiceType") == "One-off service")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[5]/div[@class='twelve wide column']/div/div[@class='field']", 10000);
-                    ServiceTypeOptions.Click();
-                    ServicetypeOneOff.Click();
-                }
-                #endregion
+        //Location Type
+        private IWebElement actualLocationType => driver.FindElement(By.XPath("//div[text()='Location Type']//following-sibling::div"));
 
-                #region Select Location Type
-                //Select the Location Type
-                if (GlobalDefinitions.ExcelLib.ReadData(2, "LocationType") == "On-site")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[6]/div[@class='twelve wide column']/div/div[@class = 'field']", 10000);
-                    LocationTypeOption.Click();
-                    LocationSelOnsite.Click();
-                }
-                else if (GlobalDefinitions.ExcelLib.ReadData(2, "LocationType") == "Online")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[6]/div[@class='twelve wide column']/div/div[@class = 'field']", 10000);
-                    LocationTypeOption.Click();
-                    LocationSelOnline.Click();
-                }
+        //Skill Trade
+        private IWebElement actualSkillsTrade => driver.FindElement(By.XPath("//div[text()='Skills Trade']//following-sibling::div"));
 
-                #endregion
-
-
-                #region Select Available Dates from Calendar
-                //Add start date
-                StartDateDropDown.Click();
-                // StartDateDropDown.Clear();
-                StartDateDropDown.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Startdate"));
-
-                //Add End date
-                EndDateDropDown.Click();
-                //EndDateDropDown.Clear();
-                EndDateDropDown.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Enddate"));
-
-
-                //Select available days
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//body/div/div/div[@id='service-listing-section']/div[@class='ui container']/div[@class='listing']/form[@class='ui form']/div[7]/div[2]/div[1]", 10000);
-                Days.Click();
-                Mon.Click();
-                Tue.Click();
-                Wed.Click();
-                Thurs.Click();
-
-                //Select start time and enter the time
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[3]/div[2]/input", 10000);
-                StartTimeM.Click();
-
-                StartTimeDropDownM.Click();
-                
-                StartTimeM.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Starttime")).ToString("hh:mmtt"));
-
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[4]/div[2]/input", 10000);
-                StartTimeT.Click();
-
-                StartTimeDropDownT.Click();
-                
-                StartTimeT.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Starttime")).ToString("hh:mmtt"));
-
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[5]/div[2]/input", 10000);
-                StartTimeW.Click();
-
-                StartTimeDropDownW.Click();
-               
-                StartTimeW.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Starttime")).ToString("hh:mmtt"));
-
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[6]/div[2]/input", 10000);
-                StartTimeTh.Click();
-
-                StartTimeDropDownTh.Click();
-                
-                StartTimeTh.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Starttime")).ToString("hh:mmtt"));
-
-
-
-                //Select end time from box
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[3]/div[3]/input", 10000);
-                EndTimeM.Click();
-
-                EndTimeDropDownM.Click();
-               
-                EndTimeM.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Endtime")).ToString("hh:mmtt"));
-
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[4]/div[3]/input", 10000);
-                EndTimeT.Click();
-
-                EndTimeDropDownT.Click();
-                
-                EndTimeT.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Endtime")).ToString("hh:mmtt"));
-
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[5]/div[3]/input", 10000);
-                EndTimeW.Click();
-
-                EndTimeDropDownW.Click();
-                
-                EndTimeW.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Endtime")).ToString("hh:mmtt"));
-
-                GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div/div[6]/div[3]/input", 10000);
-                EndTimeTh.Click();
-
-                EndTimeDropDownTh.Click();
-                
-                EndTimeTh.SendKeys(DateTime.Parse(GlobalDefinitions.ExcelLib.ReadData(2, "Endtime")).ToString("hh:mmtt"));
-                Thread.Sleep(1000);
-                #endregion
-
-                #region Select Skill Trade
-                //Click on Skill trade option
-
-                if (GlobalDefinitions.ExcelLib.ReadData(2, "SkillTrade") == "Skill-Exchange")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[8]/div[@class='twelve wide column']/div/div[@class='field']", 10000);
-                    SkillTradeOption.Click();
-
-                    //Add Skill exchange tag
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[8]/div[4]/div/div/div/div/div/input", 10000);
-                    SkillExchange.Click();
-                    SkillExchange.Clear();
-                    SkillExchange.SendKeys(GlobalDefinitions.ExcelLib.ReadData(2, "Skill-Exchange"));
-                    SkillExchange.SendKeys(Keys.Enter);
-                   
-
-                }
-                else if (GlobalDefinitions.ExcelLib.ReadData(2, "SkillTrade") == "Credit")
-                {
-
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[8]/div[@class='twelve wide column']/div/div[@class='field']", 10000);
-                    SkillTradeOption.Click();
-                    CreditBtn.Click();
-
-                    //Addcredit amount
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id='service-listing-section']/div[2]/div/form/div[8]/div[4]/div/div/input", 10000);
-                    CreditAmount.Click();
-                    CreditAmount.Clear();
-                    CreditAmount.SendKeys(Global.GlobalDefinitions.ExcelLib.ReadData(2, "AmountInExchange"));
-                    CreditAmount.SendKeys(Keys.Enter);
-                }
-
-                #endregion
-
-
-                #endregion
-
-                #region Select User Status
-                //Select option Active or Hidden
-                if (GlobalDefinitions.ExcelLib.ReadData(2, "UserStatus") == "Active")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[10]/div[@class='twelve wide column']/div/div[@class = 'field']", 10000);
-                    ActiveOption.Click();
-                }
-                else if (GlobalDefinitions.ExcelLib.ReadData(2, "UserStatus") == "Hidden")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//form/div[10]/div[@class='twelve wide column']/div/div[@class = 'field']", 10000);
-                    ActiveOption.Click();
-                    HiddenOpt.Click();
-                }
-                #endregion
-
-
-                #region Save / Cancel Skill
-                // Save or Cancel New Skill
-
-                if (Global.GlobalDefinitions.ExcelLib.ReadData(2, "SaveOrCancel") == "Save")
-                {
-                    GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//input[@value='Save']", 10000);
-                    Save.Click();
-                }
-                else if (Global.GlobalDefinitions.ExcelLib.ReadData(2, "SaveOrCancel") == "Cancel")
-                {
-                    Cancel.Click();
-                }
-                #endregion
-            }
-
-            catch (Exception ex)
-            {
-                Assert.Fail("Test failed to enter Skill details", ex.Message);
-            }
-        }
-
-
-
-        #region Validate share skill
-        //Verify Share skill
-
-   public void VerifySkill()
-        {
-
-            //Populate the excel data
-
-            GlobalDefinitions.ExcelLib.PopulateInCollection(Base.ExcelPath, "ShareSkill");
-
-            //Verify share skill details
-            
-            GlobalDefinitions.WaitForElementVisibility(GlobalDefinitions.driver, "XPath", "//*[@id=\"listing-management-section\"]/div[2]/div[1]/div[2]/button[2]", 10000);
-            ManageLis.Click();
-            GlobalDefinitions.driver.Navigate().Refresh();
-            try
-            {
-                GlobalDefinitions.WaitForElement(GlobalDefinitions.driver, "XPath", "//*[@id='listing-management-section']/div[2]/div[1]/div[1]/table/tbody/tr[1]/td[2]", 10000);
-                var categorycheck = GlobalDefinitions.driver.FindElement(By.XPath("//*[@id='listing-management-section']/div[2]/div[1]/div[1]/table/tbody/tr[1]/td[2]")).GetAttribute("textContent");
-                Assert.That(categorycheck, Is.EqualTo(GlobalDefinitions.ExcelLib.ReadData(2, "Category")));
-
-               GlobalDefinitions.WaitForElement(GlobalDefinitions.driver, "XPath", "//*[@id='listing-management-section']/div[2]/div[1]/div[1]/table/tbody/tr[1]/td[3]", 10000);
-                var titlecheck = GlobalDefinitions.driver.FindElement(By.XPath("//*[@id='listing-management-section']/div[2]/div[1]/div[1]/table/tbody/tr[1]/td[3]")).GetAttribute("textContent");
-                Assert.That(titlecheck, Is.EqualTo(GlobalDefinitions.ExcelLib.ReadData(2, "Title")));
-                Base.test.Log(RelevantCodes.ExtentReports.LogStatus.Pass, "Share skill added successfully");
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail("verify the share skill page failed", ex.Message);
-                Base.test.Log(RelevantCodes.ExtentReports.LogStatus.Fail, "Share skill not added");
-
-            }
-        }
+        //Skill Exchange
+        private IWebElement actualSkillExchange => driver.FindElement(By.XPath("//div[text()='Skills Trade']//following-sibling::div/span"));
         #endregion
+
+        #region Page Objects for error Messages
+
+        //Title message
+        private IWebElement errorTitle => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[1]/div/div[2]/div/div[2]/div"));
+
+        //Description message
+        private IWebElement errorDescription => driver.FindElement(By.XPath("//div[@class='tooltip-target ui grid']//div/div[2]/div[2]/div"));
+
+        //Category message
+        private IWebElement errorCategory => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[3]/div[2]/div[2]"));
+
+        //Subcategory message
+        private IWebElement errorSubcategory => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[3]/div[2]/div/div[2]/div[2]/div"));
+
+        //Tags message
+        private IWebElement errorTags => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[4]/div[2]/div[2]"));
+
+        //StartDate message
+        private IWebElement errorStartDate1 => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div[2]"));
+
+        //StartDate mesage 2
+        private IWebElement errorStartDate2 => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[7]/div[2]/div[3]"));
+
+        //Skill-Exchange tag
+        private IWebElement errorSkillExchangeTags => driver.FindElement(By.XPath("//*[@id='service-listing-section']/div[2]/div/form/div[8]/div[4]/div[2]"));
+
+        //Message
+        private IWebElement message => driver.FindElement(By.XPath(e_message));
+        private string e_message = "//div[@class='ns-box-inner']";
+
+        #endregion
+        public void EnterShareSkill(int rowNumber, string worksheet)
+        {
+
+        }
     }
 }
