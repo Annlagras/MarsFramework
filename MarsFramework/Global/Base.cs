@@ -1,32 +1,58 @@
-﻿using MarsFramework.Config;
-using MarsFramework.Pages;
+﻿using AventStack.ExtentReports;
+using AventStack.ExtentReports.Reporter;
+using Competition.Pages;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
-using RelevantCodes.ExtentReports;
 using System;
-using System.Threading;
-using static MarsFramework.Global.GlobalDefinitions;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static Competition.Global.GlobalDefinitions;
 
-namespace MarsFramework.Global
+namespace Competition.Global
 {
-    public class Base
+    class Base
     {
-        #region To access Path from resource file
+        #region Constant configuration
+        public static int Browser = 2;
+        public static string IsLogin = "true";
 
-        public static int Browser = Int32.Parse(MarsResource.Browser);
-        public static String ExcelPath = MarsResource.ExcelPath;
-        public static string ScreenshotPath = MarsResource.ScreenShotPath;
-        public static string ReportPath = MarsResource.ReportPath;
-        public static string SampleWorkPath = MarsResource.SampleWorkPath;
+        public static string excelPath = @"D:\workspace\Framework\Competition\MarsFramework\Competition\TestLibrary\TestData\TestData.xlsx";
+        public static string AutoITScriptPath = @"";
+        public static string ScreenshotPath = @"D:\workspace\Framework\Competition\MarsFramework\Competition\TestLibrary\Screenshots\";
+        public static string ReportPath = @"D:\workspace\Framework\Competition\MarsFramework\Competition\TestLibrary\TestReports\";
         #endregion
 
+        public static string ExcelPath { get => excelPath; set => excelPath = value; }
+
         #region reports
-        public static ExtentTest test;
-        public static ExtentReports extent;
+        public static AventStack.ExtentReports.ExtentReports extent;
+        public static AventStack.ExtentReports.ExtentTest test;
+
         #endregion
 
         #region setup and tear down
+        [OneTimeSetUp]
+        protected void ExtentStart()
+        {
+            //Initialize report
+            string reportName = System.IO.Directory.GetParent(@"../../../").FullName
+            + Path.DirectorySeparatorChar + "TestLibrary/TestReports"
+            + Path.DirectorySeparatorChar + "Report_" + DateTime.Now.ToString("_dd-MM-yyyy_HHmm") + Path.DirectorySeparatorChar;
+
+            //start reporters
+            ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(reportName);
+            htmlReporter.Config.DocumentTitle = "Automation Report";//Title of the report
+            htmlReporter.Config.ReportName = "Functional Report"; //Name of the report.
+            htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
+            extent = new AventStack.ExtentReports.ExtentReports();
+
+            extent.AttachReporter(htmlReporter);
+        }
+
         [SetUp]
         public void Inititalize()
         {
@@ -35,63 +61,90 @@ namespace MarsFramework.Global
             {
 
                 case 1:
-                    GlobalDefinitions.driver = new FirefoxDriver();
+                    driver = new FirefoxDriver();
                     break;
                 case 2:
-                    GlobalDefinitions.driver = new ChromeDriver();
-                    GlobalDefinitions.driver.Manage().Window.Maximize();
+                    driver = new ChromeDriver();
+                    driver.Manage().Window.Maximize();
                     break;
-
             }
 
-            //Populate the excel data
-            Thread.Sleep(5000);
-            GlobalDefinitions.ExcelLib.PopulateInCollection(Base.ExcelPath, "SignIn");
-            GlobalDefinitions.driver.Navigate().GoToUrl(GlobalDefinitions.ExcelLib.ReadData(2, "Url"));
+            //Load Excel
+            ExcelLib.PopulateInCollection(Base.excelPath, "SignIn");
 
-            #region Initialise Reports
+            //Open URL
+            driver.Navigate().GoToUrl(ExcelLib.ReadData(2, "Url"));
 
-            extent = new ExtentReports(ReportPath, false, DisplayOrder.NewestFirst);
-            extent.LoadConfig(MarsResource.ReportXMLPath);
-
-            #endregion
-           
-            if (MarsResource.IsLogin == "true")
+            if (IsLogin == "true")
             {
-                //Create Extent Report
-                test = extent.StartTest("SignIn", "Anna");
-                //SignIn
-                SignIn loginobj = new SignIn();
-                loginobj.LoginSteps();
+                SignIn obj = new SignIn();
+                obj.LoginSteps();
             }
             else
             {
-                //Create Extent Report
-                test = extent.StartTest("Join", "Anna");
-                //Join
                 SignUp obj = new SignUp();
-                obj.register();
+                obj.Register();
             }
 
         }
-
 
         [TearDown]
         public void TearDown()
         {
             // Screenshot
-            String img = SaveScreenShotClass.SaveScreenshot(GlobalDefinitions.driver, "C:\\Users\\Monday Designs Admin\\Desktop\\internship\\MarsFramework1\\TestReports");
-            test.Log(LogStatus.Info, "Image example: " + img);
-            
-            // end test. (Reports)
-            extent.EndTest(test);
+            String img = Screenshot.SaveScreenshot(GlobalDefinitions.driver, "Screenshot");
+
+            // log with snapshot
+            var exec_status = TestContext.CurrentContext.Result.Outcome.Status;
+            var errorMessage = TestContext.CurrentContext.Result.Message;
+            var stacktrace = string.IsNullOrEmpty(TestContext.CurrentContext.Result.StackTrace) ? ""
+            : string.Format("{0}", TestContext.CurrentContext.Result.StackTrace);
+
+            string TC_Name = TestContext.CurrentContext.Test.Name;
+            string base64 = Screenshot.GetScreenshot();
+
+            Status logStatus = Status.Pass;
+            switch (exec_status)
+            {
+                case TestStatus.Failed:
+
+                    logStatus = Status.Fail;
+                    test.Log(Status.Fail, exec_status + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(base64).Build());
+                    break;
+
+                case TestStatus.Skipped:
+
+                    logStatus = Status.Skip;
+                    test.Log(Status.Skip, errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(base64).Build());
+                    break;
+
+                case TestStatus.Inconclusive:
+
+                    logStatus = Status.Warning;
+                    test.Log(Status.Warning, "Test ");
+                    break;
+
+                case TestStatus.Passed:
+
+                    logStatus = Status.Pass;
+                    test.Log(Status.Pass, "Test Passed");
+                    break;
+
+                default:
+                    break;
+            }
+
+            // Close the driver            
+            driver.Close();
+            driver.Quit();
+        }
+
+        [OneTimeTearDown]
+        protected void ExtentClose()
+        {
             // calling Flush writes everything to the log file (Reports)
             extent.Flush();
-            // Close the driver :)            
-            GlobalDefinitions.driver.Close();
-            GlobalDefinitions.driver.Quit();
         }
         #endregion
-
     }
 }

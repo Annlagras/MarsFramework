@@ -1,133 +1,32 @@
-﻿using Excel;
-using NUnit.Framework;
+﻿using ExcelDataReader;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-
-namespace MarsFramework.Global
+namespace Competition.Global
 {
     class GlobalDefinitions
     {
-        //Initialise the browser
+        //Initialise driver
         public static IWebDriver driver { get; set; }
 
-        #region Wait
-        //generic reusable wait function- ElementExist
-        public static void WaitForElement(IWebDriver driver, string key, string value, int seconds)
+        #region WaitforElement 
 
+        public static void wait(int second)
         {
-            try
-            {
-                if (key == "XPath")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.XPath(value)));
-                }
-                if (key == "Id")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.Id(value)));
-                }
-                if (key == "CssSelector")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector(value)));
-                }
-                if (key == "Name")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.Name(value)));
-                }
-                if (key == "LinkText")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.LinkText(value)));
-                }
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail("Test faied waiting for an webelement to be visible", ex.Message);
-            }
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(second);
         }
-
-
-        //generic reusable wait function- ElementIsVisible
-        public static void WaitForElementVisibility(IWebDriver driver, string key, string value, int seconds)
+        public static IWebElement WaitForElement(IWebDriver driver, By ByAndlocator, int timeOutinSeconds)
         {
-            try
-            {
-                if (key == "XPath")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath(value)));
-                }
-                if (key == "Id")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id(value)));
-                }
-                if (key == "CssSelector")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector(value)));
-                }
-                if (key == "Name")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Name(value)));
-                }
-                if (key == "LinkText")
-                {
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.LinkText(value)));
-                }
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail("Test faied waiting for an webelement to be visible", ex.Message);
-            }
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeOutinSeconds));
+            return (wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(ByAndlocator)));
         }
-        public static void WaitForElementClickable(IWebDriver driver, string key, string value, int seconds)
-        {
-            var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-            if (key == "Id")
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.Id(value)));
-            }
-            if (key == "XPath")
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath(value)));
-            }
-            if (key == "CssSelector")
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector(value)));
-            }
-            if (key == "ClassName")
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.ClassName(value)));
-            }
-            if (key == "Name")
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.Name(value)));
-            }
-
-        }
-
-        public static void WaitForTextPresentInElement(IWebDriver driver, IWebElement element, string text, int seconds)
-        {
-            var wait = new WebDriverWait(driver, new TimeSpan(0, 0, seconds));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TextToBePresentInElement(element, text));
-
-        }
-
         #endregion
-
 
         #region Excel 
         public class ExcelLib
@@ -148,25 +47,33 @@ namespace MarsFramework.Global
             }
 
 
-            private static DataTable ExcelToDataTable(string fileName, string SheetName)
+            public static DataTable ExcelToDataTable(string fileName, string SheetName)
             {
+                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
                 // Open file and return as Stream
                 using (System.IO.FileStream stream = File.Open(fileName, FileMode.Open, FileAccess.Read))
                 {
-                    using (IExcelDataReader excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream))
+                    using (IExcelDataReader excelReader = ExcelReaderFactory.CreateReader(stream))
                     {
-                        excelReader.IsFirstRowAsColumnNames = true;
+                        //excelReader.IsFirstRowAsColumnNames = true;
 
                         //Return as dataset
-                        DataSet result = excelReader.AsDataSet();
+                        var result = excelReader.AsDataSet(new ExcelDataSetConfiguration()
+                        {
+                            ConfigureDataTable = (data) => new ExcelDataTableConfiguration()
+                            {
+
+                                UseHeaderRow = true
+                            }
+                        });
+
                         //Get all the tables
                         DataTableCollection table = result.Tables;
 
                         // store it in data table
                         DataTable resultTable = table[SheetName];
 
-                        excelReader.Close();
-                         
+                        // return
                         return resultTable;
                     }
                 }
@@ -176,18 +83,22 @@ namespace MarsFramework.Global
             {
                 try
                 {
-                    //Retriving Data using LINQ to reduce much of iterations
+                    //Retrieving Data using LINQ to reduce much of iterations
 
                     rowNumber = rowNumber - 1;
                     string data = (from colData in dataCol
                                    where colData.colName == columnName && colData.rowNumber == rowNumber
                                    select colData.colValue).SingleOrDefault();
 
+                    //var datas = dataCol.Where(x => x.colName == columnName && x.rowNumber == rowNumber).SingleOrDefault().colValue;
+
+
                     return data.ToString();
                 }
 
                 catch (Exception e)
                 {
+                    //Added by Kumar
                     Console.WriteLine("Exception occurred in ExcelLib Class ReadData Method!" + Environment.NewLine + e.Message.ToString());
                     return null;
                 }
@@ -210,40 +121,36 @@ namespace MarsFramework.Global
                             colValue = table.Rows[row - 1][col].ToString()
                         };
 
-
                         //Add all the details for each row
                         dataCol.Add(dtTable);
-
                     }
                 }
-
             }
         }
 
         #endregion
 
         #region screenshots
-        public class SaveScreenShotClass
+        public class Screenshot
         {
-            public static string SaveScreenshot(IWebDriver driver, string ScreenShotFileName) // Definition
+            public static string SaveScreenshot(IWebDriver driver, string ScreenShotFileName)
             {
-                var folderLocation = (Base.ScreenshotPath);
-
-                if (!System.IO.Directory.Exists(folderLocation))
+                if (!System.IO.Directory.Exists(Base.ScreenshotPath))
                 {
-                    System.IO.Directory.CreateDirectory(folderLocation);
+                    System.IO.Directory.CreateDirectory(Base.ScreenshotPath);
                 }
 
-                var screenShot = ((ITakesScreenshot)driver).GetScreenshot();
-                var fileName = new StringBuilder(folderLocation);
-
-                fileName.Append(ScreenShotFileName);
-                fileName.Append(DateTime.Now.ToString("_dd-mm-yyyy_mss"));
-                //fileName.Append(DateTime.Now.ToString("dd-mm-yyyym_ss"));
-                fileName.Append(".jpeg");
+                var screenShot = ((ITakesScreenshot)GlobalDefinitions.driver).GetScreenshot();
+                var fileName = new StringBuilder(Base.ScreenshotPath + ScreenShotFileName + DateTime.Now.ToString("_dd-MM-yyyy_HHmm") + ".jpeg");
                 screenShot.SaveAsFile(fileName.ToString(), ScreenshotImageFormat.Jpeg);
                 return fileName.ToString();
             }
+
+            public static string GetScreenshot()
+            {
+                return ((ITakesScreenshot)driver).GetScreenshot().AsBase64EncodedString;
+            }
+
         }
         #endregion
     }
